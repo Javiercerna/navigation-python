@@ -17,6 +17,14 @@ class Path(object):
         self._construct_path()
         self.path_curvature = self._compute_path_curvature()
 
+    def as_array(self):
+        path_array = np.zeros((len(self.path_x), 2))
+
+        for ind in range(len(self.path_x)):
+            path_array[ind] = np.array([self.path_x[ind], self.path_y[ind]])
+
+        return path_array
+
     def _construct_path(self):
         self.path_x = []
         self.path_y = []

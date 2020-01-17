@@ -18,6 +18,9 @@ class Vehicle(object):
         self.MAX_STEERING_ANGLE = max_steering_angle
 
     def send_commands(self, velocity, steering_angle):
+        velocity = self._limit_velocity(velocity)
+        steering_angle = self._limit_steering_angle(steering_angle)
+
         self.x = self.x + velocity * self.dt * np.cos(self.theta)
         self.y = self.y + velocity * self.dt * np.sin(self.theta)
         self.theta = self.theta + velocity * self.dt * \
