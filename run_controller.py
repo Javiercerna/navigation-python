@@ -26,13 +26,11 @@ wheelbase = 1
 max_velocity = 10
 max_steering_angle = math.pi/4
 
-initial_pose = np.array([0, 0, math.pi/2])
+initial_state = np.array([0, 0, math.pi/2])
 
 vehicle = Vehicle(
-    wheelbase=wheelbase, initial_x=initial_pose[0],
-    initial_y=initial_pose[1],
-    initial_theta=initial_pose[2],
-    dt=dt, max_velocity=max_velocity, max_steering_angle=max_steering_angle)
+    wheelbase=wheelbase, initial_state=initial_state, dt=dt,
+    max_velocity=max_velocity, max_steering_angle=max_steering_angle)
 
 vehicle_x = np.zeros(simulation_steps)
 vehicle_y = np.zeros(simulation_steps)
@@ -42,15 +40,14 @@ pure_pursuit = PurePursuit(
     wheelbase=wheelbase, lookahead_distance=lookahead_distance)
 
 for k in range(simulation_steps):
-    vehicle_pose = np.array([vehicle.x, vehicle.y, vehicle.theta])
     steering_angle = pure_pursuit.compute_steering_angle(
-        vehicle_pose, path.as_array())
+        vehicle.state, path.as_array())
 
     if steering_angle is not None:
         vehicle.send_commands(velocity=velocity, steering_angle=steering_angle)
 
-    vehicle_x[k] = vehicle.x
-    vehicle_y[k] = vehicle.y
+    vehicle_x[k] = vehicle.state[0]
+    vehicle_y[k] = vehicle.state[1]
     steering_angles[k] = steering_angle
 
     plt.clf()
