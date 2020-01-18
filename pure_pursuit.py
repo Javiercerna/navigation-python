@@ -10,6 +10,7 @@ class PurePursuit(object):
 
     def compute_steering_angle(self, vehicle_pose, path):
         vehicle_position = vehicle_pose[0:2]
+
         closest_path_ind = self._find_closest_point_on_path(
             vehicle_position, path)
 
@@ -24,30 +25,24 @@ class PurePursuit(object):
         return self._convert_curvature_to_steering_angle(curvature)
 
     def _find_closest_point_on_path(self, vehicle_position, path):
-        min_distance = 1e20
-        min_distance_ind = -1
+        vehicle_position = np.tile(vehicle_position, reps=(len(path), 1))
 
-        for ind in range(len(path)):
-            distance = np.linalg.norm(path[ind] - vehicle_position)
+        distances_to_path = np.linalg.norm(path - vehicle_position, axis=1)
 
-            if distance < min_distance:
-                min_distance = distance
-                min_distance_ind = ind
-
-        return min_distance_ind
+        return np.argmin(distances_to_path)
 
     def _find_goal_point(self, closest_path_ind, path):
         start_point = path[closest_path_ind]
 
-        for ind in range(closest_path_ind+1, len(path)):
+        num_points_visited = 0
+        ind = closest_path_ind + 1
+        while num_points_visited < len(path):
             distance = np.linalg.norm(path[ind] - start_point)
             if distance >= self.lookahead_distance:
                 return path[ind]
 
-        for ind in range(len(path)):
-            distance = np.linalg.norm(path[ind] - start_point)
-            if distance >= self.lookahead_distance:
-                return path[ind]
+            ind = (ind + 1) % len(path)
+            num_points_visited += 1
 
         print('No goal point found')
         return None

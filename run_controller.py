@@ -57,7 +57,6 @@ for k in range(simulation_steps):
 
     plt.pause(0.01)
 
-
 plt.figure()
 plt.plot(steering_angles)
 
