@@ -18,7 +18,7 @@ class SpatialBicycleModel(object):
         path_angle = self._calculate_path_angle(path, ind_closest_point)
 
         e_y = np.linalg.norm(path_point - vehicle_position)
-        e_phi = vehicle_pose[2] - path_angle
+        e_phi = self._normalize_angle(vehicle_pose[2] - path_angle)
 
         return np.array([e_y, e_phi])
 
@@ -36,10 +36,13 @@ class SpatialBicycleModel(object):
 
         return np.arctan2(dy_dt[ind_closest_point], dx_dt[ind_closest_point])
 
+    def _normalize_angle(self, angle):
+        return (angle + math.pi) % (2 * math.pi) - math.pi
+
 
 if __name__ == '__main__':
     path = np.array([[x, x**2] for x in range(0, 5)])
-    vehicle_pose = np.array([3, 4, 0])
+    vehicle_pose = np.array([3, 4, math.atan(4) + 2*math.pi])
 
     spatial_bicycle_model = SpatialBicycleModel()
 
