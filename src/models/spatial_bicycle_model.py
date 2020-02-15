@@ -60,17 +60,11 @@ class SpatialBicycleModel(object):
         return np.arctan2(dy, dx)
 
     def _calculate_e_y(self, path_point, path_point_next, vehicle_position):
-        e_y_value = np.linalg.norm(path_point - vehicle_position)
+        dx = vehicle_position[0] - path_point[0]
+        dy = vehicle_position[1] - path_point[1]
+        path_angle = self._calculate_path_angle(path_point, path_point_next)
 
-        path_vector = path_point_next - path_point
-        e_y_vector = path_point - vehicle_position
-
-        if int(np.cross(path_vector, e_y_vector)) >= 0:
-            e_y_sign = 1
-        else:
-            e_y_sign = -1
-
-        return e_y_sign * e_y_value
+        return -np.sin(path_angle) * dx + np.cos(path_angle)*dy
 
     def _normalize_angle(self, angle):
         return (angle + math.pi) % (2 * math.pi) - math.pi

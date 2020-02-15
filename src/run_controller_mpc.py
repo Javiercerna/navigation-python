@@ -14,10 +14,10 @@ simulation_time = 80
 dt = 0.1
 simulation_steps = int(simulation_time / dt)
 
-Q = sparse.diags([0.5, 0.5])
+Q = sparse.diags([1, 1])
 Qn = Q
 R = 0.1*sparse.eye(1)
-prediction_horizon = 3
+prediction_horizon = 10
 velocity = 5
 
 with open('./src/paths/simulated_waypoints.json') as f:

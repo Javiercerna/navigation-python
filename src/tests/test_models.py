@@ -8,10 +8,10 @@ import math
 
 @pytest.mark.parametrize('vehicle, result', [
     ({'x': 0, 'y': 0, 'theta': math.pi/2}, {'e_y': 0, 'e_psi': 0}),
-    ({'x': 1, 'y': 0, 'theta': math.pi/2}, {'e_y': 1, 'e_psi': 0}),
-    ({'x': -1, 'y': 0, 'theta': math.pi/2}, {'e_y': -1, 'e_psi': 0}),
-    ({'x': 100, 'y': 0, 'theta': 0}, {'e_y': 100, 'e_psi': -math.pi/2}),
-    ({'x': -100, 'y': 0, 'theta': math.pi}, {'e_y': -100, 'e_psi': math.pi/2})
+    ({'x': 1, 'y': 0, 'theta': math.pi/2}, {'e_y': -1, 'e_psi': 0}),
+    ({'x': -1, 'y': 0, 'theta': math.pi/2}, {'e_y': 1, 'e_psi': 0}),
+    ({'x': 100, 'y': 0, 'theta': 0}, {'e_y': -100, 'e_psi': -math.pi/2}),
+    ({'x': -100, 'y': 0, 'theta': math.pi}, {'e_y': 100, 'e_psi': math.pi/2})
 ])
 def test_vehicle_in_path(path_array, vehicle, result, plot):
     vehicle_pose = np.array([vehicle['x'], vehicle['y'], vehicle['theta']])
