@@ -47,11 +47,11 @@ def test_mpc(waypoints, vehicle, result, plot):
     Qn = Q
     R = 0.1*sparse.eye(1)
     prediction_horizon = 2
-    steering_angle_min = -math.pi/2
-    steering_angle_max = math.pi/2
+    kappa_tilde_min = -100
+    kappa_tilde_max = 100
 
     mpc = MPC(Q, R, Qn, prediction_horizon,
-              steering_angle_min, steering_angle_max)
+              kappa_tilde_min, kappa_tilde_max)
 
     A, B, reference_curvature = spatial_bicycle_model.get_linearized_matrices(
         vehicle_pose, path.as_array(), path_curvatures)

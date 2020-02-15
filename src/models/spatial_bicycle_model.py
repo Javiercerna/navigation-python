@@ -21,9 +21,9 @@ class SpatialBicycleModel(object):
 
         e_y = self._calculate_e_y(
             path_point, path_point_next, vehicle_position)
-        e_phi = self._normalize_angle(vehicle_pose[2] - path_angle)
+        e_psi = self._normalize_angle(vehicle_pose[2] - path_angle)
 
-        return np.array([e_y, e_phi])
+        return np.array([e_y, e_psi])
 
     def get_linearized_matrices(self, vehicle_pose, path, path_curvatures):
         vehicle_position = vehicle_pose[0:2]
