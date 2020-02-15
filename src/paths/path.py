@@ -32,8 +32,10 @@ class Path(object):
         for ind in range(-1, len(self.waypoints_x) - 1):
             self.path_x += np.linspace(self.waypoints_x[ind],
                                        self.waypoints_x[ind + 1]).tolist()
+            self.path_x.pop()  # Avoid duplicates
             self.path_y += np.linspace(self.waypoints_y[ind],
                                        self.waypoints_y[ind + 1]).tolist()
+            self.path_y.pop()  # Avoid duplicates
 
     def _compute_path_curvature(self):
         dx_dt = np.gradient(np.array(self.path_x))

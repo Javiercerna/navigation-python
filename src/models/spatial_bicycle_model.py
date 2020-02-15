@@ -17,7 +17,7 @@ class SpatialBicycleModel(object):
 
         path_point = path[ind_closest_point]
         path_point_next = path[(ind_closest_point + 1) % len(path)]
-        path_angle = self._calculate_path_angle(path, ind_closest_point)
+        path_angle = self._calculate_path_angle(path_point, path_point_next)
 
         e_y = self._calculate_e_y(
             path_point, path_point_next, vehicle_position)
@@ -33,10 +33,14 @@ class SpatialBicycleModel(object):
 
         path_curvature = path_curvatures[ind_closest_point]
 
-        A = np.array([[1, self.ds],
-                      [(-path_curvature ** 2) * self.ds, 1]])
+        path_point = path[ind_closest_point]
+        path_point_next = path[(ind_closest_point + 1) % len(path)]
+        ds = np.linalg.norm(path_point_next - path_point)
 
-        B = np.array([[0], [self.ds]])
+        A = np.array([[1, ds],
+                      [(-path_curvature ** 2) * ds, 1]])
+
+        B = np.array([[0], [ds]])
 
         return A, B, path_curvature
 
@@ -49,11 +53,11 @@ class SpatialBicycleModel(object):
 
         return np.argmin(distances_to_path)
 
-    def _calculate_path_angle(self, path, ind_closest_point):
-        dx_dt = np.gradient(path[:, 0])
-        dy_dt = np.gradient(path[:, 1])
+    def _calculate_path_angle(self, path_point, path_point_next):
+        dx = path_point_next[0] - path_point[0]
+        dy = path_point_next[1] - path_point[1]
 
-        return np.arctan2(dy_dt[ind_closest_point], dx_dt[ind_closest_point])
+        return np.arctan2(dy, dx)
 
     def _calculate_e_y(self, path_point, path_point_next, vehicle_position):
         e_y_value = np.linalg.norm(path_point - vehicle_position)

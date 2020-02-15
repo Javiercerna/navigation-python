@@ -6,17 +6,6 @@ import pytest
 import math
 
 
-@pytest.fixture
-def path_array():
-    waypoints_x = [0 for _ in range(0, 5)]
-    waypoints_y = [x for x in range(0, 5)]
-    path_array = np.array([np.array([waypoints_x[ind],
-                                     waypoints_y[ind]])
-                           for ind in range(len(waypoints_x))])
-
-    return path_array
-
-
 @pytest.mark.parametrize('vehicle, result', [
     ({'x': 0, 'y': 0, 'theta': math.pi/2}, {'e_y': 0, 'e_psi': 0}),
     ({'x': 1, 'y': 0, 'theta': math.pi/2}, {'e_y': 1, 'e_psi': 0}),
