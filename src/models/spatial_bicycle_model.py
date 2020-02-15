@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from path import Path
+from paths.path import Path
 
 import math
 

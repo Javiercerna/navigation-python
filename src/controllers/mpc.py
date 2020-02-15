@@ -2,8 +2,8 @@ from scipy import sparse
 import numpy as np
 import osqp
 
-from spatial_bicycle_model import SpatialBicycleModel
-from path import Path
+from models.spatial_bicycle_model import SpatialBicycleModel
+from paths.path import Path
 
 import math
 
