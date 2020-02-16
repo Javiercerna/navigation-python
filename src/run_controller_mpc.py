@@ -41,10 +41,11 @@ vehicle_x = np.zeros(simulation_steps)
 vehicle_y = np.zeros(simulation_steps)
 steering_angles = np.zeros(simulation_steps)
 
+spatial_bicycle_model = SpatialBicycleModel()
+
 mpc = MPC(Q=Q, R=R, Qn=Qn, prediction_horizon=prediction_horizon,
           kappa_tilde_min=-np.inf, kappa_tilde_max=np.inf, wheelbase=wheelbase)
-
-spatial_bicycle_model = SpatialBicycleModel()
+mpc.setup_optimization_problem(spatial_bicycle_model, vehicle.state, path)
 
 for k in range(simulation_steps):
     steering_angle = mpc.compute_steering_angle(
