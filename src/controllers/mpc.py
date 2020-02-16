@@ -2,16 +2,13 @@ from scipy import sparse
 import numpy as np
 import osqp
 
-from models.spatial_bicycle_model import SpatialBicycleModel
-from paths.path import Path
-
 import math
 
 
 class MPC(object):
     def __init__(
             self, Q, R, Qn, prediction_horizon, kappa_tilde_min,
-            kappa_tilde_max):
+            kappa_tilde_max, wheelbase):
         self.Q = Q
         self.R = R
         self.Qn = Qn
@@ -24,11 +21,35 @@ class MPC(object):
         self.e_psi_min = -math.pi/2
         self.e_psi_max = math.pi/2
 
+        self.wheelbase = wheelbase
+
         self.state_reference = np.array([0, 0])
 
         self.optimization_problem = osqp.OSQP()
 
-    def compute_steering_angle(self, A, B, state):
+    def compute_steering_angle(
+            self, spatial_bicycle_model, vehicle_pose, path):
+        A, B, reference_curvature = spatial_bicycle_model.get_linearized_matrices(
+            vehicle_pose, path.as_array(), path.path_curvature)
+
+        state = spatial_bicycle_model.get_state(vehicle_pose, path.as_array())
+        print('State: e_y={}, e_psi={}'.format(state[0], state[1]))
+
+        optimization_result = self._compute_optimal_control(A, B, state)
+
+        _, nu = B.shape
+        kappa_tilde = optimization_result.x[-self.prediction_horizon * nu: - (
+            self.prediction_horizon - 1) * nu]
+
+        if kappa_tilde[0] is None:
+            print('Problem infeasible...')
+            return None
+
+        curvature = kappa_tilde[0] + reference_curvature
+
+        return self._convert_curvature_to_steering_angle(curvature)
+
+    def _compute_optimal_control(self, A, B, state):
         A_equality, lower_bound_equality, upper_bound_equality = self._make_state_evolution_constraints(
             A, B, state)
 
@@ -105,3 +126,6 @@ class MPC(object):
         upper_bound = np.hstack([upper_bound_state, upper_bound_input])
 
         return lower_bound, upper_bound
+
+    def _convert_curvature_to_steering_angle(self, curvature):
+        return np.arctan2(curvature * self.wheelbase, 1)

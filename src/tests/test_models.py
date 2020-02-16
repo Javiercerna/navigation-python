@@ -16,7 +16,7 @@ import math
 def test_vehicle_in_path(path_array, vehicle, result, plot):
     vehicle_pose = np.array([vehicle['x'], vehicle['y'], vehicle['theta']])
 
-    spatial_bicycle_model = SpatialBicycleModel(ds=0.1)
+    spatial_bicycle_model = SpatialBicycleModel()
 
     state = spatial_bicycle_model.get_state(vehicle_pose, path_array)
 

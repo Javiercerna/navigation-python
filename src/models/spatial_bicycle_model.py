@@ -6,9 +6,6 @@ import math
 
 
 class SpatialBicycleModel(object):
-    def __init__(self, ds):
-        self.ds = ds
-
     def get_state(self, vehicle_pose, path):
         vehicle_position = vehicle_pose[0:2]
 

@@ -39,9 +39,8 @@ def test_mpc(waypoints, vehicle, result, plot):
 
     waypoints_x, waypoints_y = waypoints
     path = Path(waypoints_x, waypoints_y)
-    path_curvatures = path.path_curvature
 
-    spatial_bicycle_model = SpatialBicycleModel(ds=0.1)
+    spatial_bicycle_model = SpatialBicycleModel()
 
     Q = sparse.diags([1., 1.])
     Qn = Q
@@ -49,23 +48,12 @@ def test_mpc(waypoints, vehicle, result, plot):
     prediction_horizon = 2
     kappa_tilde_min = -100
     kappa_tilde_max = 100
+    wheelbase = 1
 
     mpc = MPC(Q, R, Qn, prediction_horizon,
-              kappa_tilde_min, kappa_tilde_max)
+              kappa_tilde_min, kappa_tilde_max, wheelbase)
 
-    A, B, reference_curvature = spatial_bicycle_model.get_linearized_matrices(
-        vehicle_pose, path.as_array(), path_curvatures)
-
-    state = spatial_bicycle_model.get_state(vehicle_pose, path.as_array())
-
-    print(state)
-    mpc_result = mpc.compute_steering_angle(A, B, state)
-
-    _, nu = B.shape
-    k_tilde = mpc_result.x[-prediction_horizon*nu:-(prediction_horizon-1)*nu]
-    curvature = k_tilde + reference_curvature
-
-    wheelbase = 1
-    steering_angle = float(np.arctan2(curvature * wheelbase, 1))
+    steering_angle = mpc.compute_steering_angle(
+        spatial_bicycle_model, vehicle_pose, path)
 
     assert steering_angle == result['steering_angle']
