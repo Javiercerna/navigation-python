@@ -52,9 +52,10 @@ def test_mpc(waypoints, vehicle, result, plot):
 
     mpc = MPC(Q, R, Qn, prediction_horizon,
               kappa_tilde_min, kappa_tilde_max, wheelbase)
-    mpc.setup_optimization_problem(spatial_bicycle_model, vehicle_pose, path)
+    mpc.setup_optimization_problem(
+        spatial_bicycle_model, vehicle_pose, path.as_array_with_curvature())
 
     steering_angle = mpc.compute_steering_angle(
-        spatial_bicycle_model, vehicle_pose, path)
+        spatial_bicycle_model, vehicle_pose, path.as_array_with_curvature())
 
     assert steering_angle == result['steering_angle']

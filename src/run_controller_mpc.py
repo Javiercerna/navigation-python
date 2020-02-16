@@ -45,11 +45,12 @@ spatial_bicycle_model = SpatialBicycleModel()
 
 mpc = MPC(Q=Q, R=R, Qn=Qn, prediction_horizon=prediction_horizon,
           kappa_tilde_min=-np.inf, kappa_tilde_max=np.inf, wheelbase=wheelbase)
-mpc.setup_optimization_problem(spatial_bicycle_model, vehicle.state, path)
+mpc.setup_optimization_problem(
+    spatial_bicycle_model, vehicle.state, path.as_array_with_curvature())
 
 for k in range(simulation_steps):
     steering_angle = mpc.compute_steering_angle(
-        spatial_bicycle_model, vehicle.state, path)
+        spatial_bicycle_model, vehicle.state, path.as_array_with_curvature())
 
     if steering_angle is not None:
         vehicle.send_commands(velocity=velocity, steering_angle=steering_angle)

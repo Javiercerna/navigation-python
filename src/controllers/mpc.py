@@ -28,11 +28,11 @@ class MPC(object):
         self.optimization_problem = osqp.OSQP()
 
     def setup_optimization_problem(
-            self, spatial_bicycle_model, vehicle_pose, path):
+            self, spatial_bicycle_model, vehicle_pose, path_array):
         A, B, _ = spatial_bicycle_model.get_linearized_matrices(
-            vehicle_pose, path.as_array(), path.path_curvature)
+            vehicle_pose, path_array)
 
-        state = spatial_bicycle_model.get_state(vehicle_pose, path.as_array())
+        state = spatial_bicycle_model.get_state(vehicle_pose, path_array)
 
         nx, nu = B.shape
         lower_bound_equality, upper_bound_equality = self._make_state_dynamics_constraints(
@@ -55,11 +55,11 @@ class MPC(object):
         self.upper_bound = upper_bound
 
     def compute_steering_angle(
-            self, spatial_bicycle_model, vehicle_pose, path):
+            self, spatial_bicycle_model, vehicle_pose, path_array):
         A, B, reference_curvature = spatial_bicycle_model.get_linearized_matrices(
-            vehicle_pose, path.as_array(), path.path_curvature)
+            vehicle_pose, path_array)
 
-        state = spatial_bicycle_model.get_state(vehicle_pose, path.as_array())
+        state = spatial_bicycle_model.get_state(vehicle_pose, path_array)
         print('State: e_y={}, e_psi={}'.format(state[0], state[1]))
 
         optimization_result = self._compute_optimal_control(A, B, state)
