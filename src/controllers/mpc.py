@@ -70,11 +70,14 @@ class MPC(object):
 
         if kappa_tilde[0] is None:
             print('Problem infeasible...')
-            return None
+            return None, None
 
         curvature = kappa_tilde[0] + reference_curvature
 
-        return self._convert_curvature_to_steering_angle(curvature)
+        predicted_poses = spatial_bicycle_model.calculate_predicted_poses(
+            state, self.prediction_horizon)
+
+        return self._convert_curvature_to_steering_angle(curvature), predicted_poses
 
     def _compute_optimal_control(self, A_linearized, B_linearized, state):
         nx, _ = B_linearized.shape

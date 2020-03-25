@@ -21,6 +21,31 @@ class SpatialBicycleModel(object):
 
         return np.array([e_y, e_psi])
 
+    def calculate_predicted_poses(self, spatial_state, prediction_horizon):
+        predicted_poses = []
+
+        for horizon_step in range(prediction_horizon):
+            predicted_pose = self._calculate_pose(spatial_state, horizon_step)
+            predicted_poses.append(predicted_pose)
+
+        return np.array(predicted_poses)
+
+    def _calculate_pose(self, spatial_state, horizon_step=0):
+        path_index = (self.path_index + horizon_step) % len(self.path_xy)
+
+        path_point = self.path_xy[path_index]
+        path_point_next = self.path_xy[(path_index + 1) % len(self.path_xy)]
+
+        path_angle = self._calculate_path_angle(path_point, path_point_next)
+
+        e_y, e_psi = spatial_state
+
+        x = path_point[0] - e_y * np.sin(path_angle)
+        y = path_point[1] + e_y * np.cos(path_angle)
+        angle = self._normalize_angle(e_psi + path_angle)
+
+        return np.array([x, y, angle])
+
     def calculate_linearized_matrices(self, horizon_step=0):
         path_index = (self.path_index + horizon_step) % len(self.path_xy)
 

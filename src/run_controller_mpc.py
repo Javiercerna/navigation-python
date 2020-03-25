@@ -51,7 +51,9 @@ mpc.setup_optimization_problem(spatial_bicycle_model)
 for k in range(simulation_steps):
     spatial_bicycle_model.update(path.as_array_with_curvature(), vehicle.state)
 
-    steering_angle = mpc.compute_steering_angle(spatial_bicycle_model)
+    steering_angle, predicted_poses = mpc.compute_steering_angle(
+        spatial_bicycle_model
+    )
 
     if steering_angle is not None:
         vehicle.send_commands(velocity=velocity, steering_angle=steering_angle)
@@ -64,6 +66,11 @@ for k in range(simulation_steps):
     plt.plot(vehicle_x[k], vehicle_y[k], '-ko')
     plt.plot(vehicle_x[0:k], vehicle_y[0:k], 'b')
     plt.plot(path.path_x, path.path_y, 'g')
+
+    if predicted_poses is not None:
+        plt.plot(
+            predicted_poses[:, 0], predicted_poses[:, 1], 'r', linewidth=2
+        )
 
     plt.pause(0.01)
 
