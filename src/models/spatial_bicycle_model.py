@@ -1,55 +1,50 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from paths.path import Path
 
 import math
 
 
 class SpatialBicycleModel(object):
-    def get_state(self, vehicle_pose, path_array):
-        vehicle_position = vehicle_pose[0:2]
-        path_xy = np.array([waypoint[0:2] for waypoint in path_array])
+    def __init__(self, path, vehicle_pose):
+        self.update(path, vehicle_pose)
 
-        ind_closest_point = self._find_ind_of_closest_point_on_path(
-            vehicle_position, path_xy)
+    def update(self, path, vehicle_pose):
+        self.path_xy = path[:, 0:2]
+        self.path_curvatures = path[:, 2]
+        self.vehicle_pose = vehicle_pose
 
-        path_point = path_xy[ind_closest_point]
-        path_point_next = path_xy[(ind_closest_point + 1) % len(path_xy)]
-        path_angle = self._calculate_path_angle(path_point, path_point_next)
+        self.path_index = self._calculate_closest_point_on_path_index()
 
-        e_y = self._calculate_e_y(
-            path_point, path_point_next, vehicle_position)
-        e_psi = self._normalize_angle(vehicle_pose[2] - path_angle)
+    def calculate_spatial_state(self):
+        e_y = self._calculate_e_y()
+        e_psi = self._calculate_e_psi()
 
         return np.array([e_y, e_psi])
 
-    def get_linearized_matrices(self, vehicle_pose, path_array):
-        vehicle_position = vehicle_pose[0:2]
-        path_xy = np.array([waypoint[0:2] for waypoint in path_array])
-        path_curvatures = np.array([waypoint[2] for waypoint in path_array])
+    def calculate_linearized_matrices(self, horizon_step=0):
+        path_index = (self.path_index + horizon_step) % len(self.path_xy)
 
-        ind_closest_point = self._find_ind_of_closest_point_on_path(
-            vehicle_position, path_xy)
+        path_point = self.path_xy[path_index]
+        path_point_next = self.path_xy[(path_index + 1) % len(self.path_xy)]
 
-        path_curvature = path_curvatures[ind_closest_point]
-
-        path_point = path_xy[ind_closest_point]
-        path_point_next = path_xy[(ind_closest_point + 1) % len(path_xy)]
         ds = np.linalg.norm(path_point_next - path_point)
+        path_curvature = self.path_curvatures[path_index]
 
-        A = np.array([[1, ds],
-                      [(-path_curvature ** 2) * ds, 1]])
+        A_linearized = np.array([[1, ds],
+                                 [(-path_curvature ** 2) * ds, 1]])
 
-        B = np.array([[0], [ds]])
+        B_linearized = np.array([[0], [ds]])
 
-        return A, B, path_curvature
+        return A_linearized, B_linearized
 
-    def _find_ind_of_closest_point_on_path(self, vehicle_position, path_xy):
-        vehicle_position = np.tile(vehicle_position, reps=(len(path_xy), 1))
+    def get_path_curvature(self, horizon_step=0):
+        path_index = (self.path_index + horizon_step) % len(self.path_xy)
 
-        distances = path_xy - vehicle_position
-        distances_to_path = np.linalg.norm(
-            distances.astype(np.float64), axis=1)
+        return self.path_curvatures[path_index]
+
+    def _calculate_closest_point_on_path_index(self):
+        vehicle_xy = self.vehicle_pose[0:2]
+        distances_to_path = np.linalg.norm(self.path_xy - vehicle_xy, axis=1)
 
         return np.argmin(distances_to_path)
 
@@ -59,12 +54,30 @@ class SpatialBicycleModel(object):
 
         return np.arctan2(dy, dx)
 
-    def _calculate_e_y(self, path_point, path_point_next, vehicle_position):
-        dx = vehicle_position[0] - path_point[0]
-        dy = vehicle_position[1] - path_point[1]
+    def _calculate_e_y(self):
+        vehicle_xy = self.vehicle_pose[0:2]
+
+        path_point = self.path_xy[self.path_index]
+        path_point_next = self.path_xy[
+            (self.path_index + 1) % len(self.path_xy)
+        ]
+
+        dx = vehicle_xy[0] - path_point[0]
+        dy = vehicle_xy[1] - path_point[1]
+
         path_angle = self._calculate_path_angle(path_point, path_point_next)
 
-        return -np.sin(path_angle) * dx + np.cos(path_angle)*dy
+        return -np.sin(path_angle) * dx + np.cos(path_angle) * dy
+
+    def _calculate_e_psi(self):
+        path_point = self.path_xy[self.path_index]
+        path_point_next = self.path_xy[
+            (self.path_index + 1) % len(self.path_xy)
+        ]
+
+        path_angle = self._calculate_path_angle(path_point, path_point_next)
+
+        return self._normalize_angle(self.vehicle_pose[2] - path_angle)
 
     def _normalize_angle(self, angle):
         return (angle + math.pi) % (2 * math.pi) - math.pi

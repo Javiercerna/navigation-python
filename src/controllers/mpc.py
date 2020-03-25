@@ -18,8 +18,8 @@ class MPC(object):
         self.kappa_tilde_max = kappa_tilde_max
         self.e_y_min = -3
         self.e_y_max = 3
-        self.e_psi_min = -math.pi/2
-        self.e_psi_max = math.pi/2
+        self.e_psi_min = -math.pi / 2
+        self.e_psi_max = math.pi / 2
 
         self.wheelbase = wheelbase
 
@@ -27,14 +27,12 @@ class MPC(object):
 
         self.optimization_problem = osqp.OSQP()
 
-    def setup_optimization_problem(
-            self, spatial_bicycle_model, vehicle_pose, path_array):
-        A, B, _ = spatial_bicycle_model.get_linearized_matrices(
-            vehicle_pose, path_array)
+    def setup_optimization_problem(self, spatial_bicycle_model):
+        A_linearized, B_linearized = spatial_bicycle_model.calculate_linearized_matrices()
 
-        state = spatial_bicycle_model.get_state(vehicle_pose, path_array)
+        state = spatial_bicycle_model.calculate_spatial_state()
 
-        nx, nu = B.shape
+        nx, nu = B_linearized.shape
         lower_bound_equality, upper_bound_equality = self._make_state_dynamics_constraints(
             state, nx)
 
@@ -42,7 +40,7 @@ class MPC(object):
 
         # OSQP setup
         P, q = self._make_quadratic_and_linear_objective(nu)
-        A_constraints = self._make_A_constraints(A, B)
+        A_constraints = self._make_A_constraints(A_linearized, B_linearized)
         lower_bound = np.hstack([lower_bound_equality, lower_bound_inequality])
         upper_bound = np.hstack([upper_bound_equality, upper_bound_inequality])
 
@@ -54,17 +52,19 @@ class MPC(object):
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
 
-    def compute_steering_angle(
-            self, spatial_bicycle_model, vehicle_pose, path_array):
-        A, B, reference_curvature = spatial_bicycle_model.get_linearized_matrices(
-            vehicle_pose, path_array)
+    def compute_steering_angle(self, spatial_bicycle_model):
+        A_linearized, B_linearized = spatial_bicycle_model.calculate_linearized_matrices()
 
-        state = spatial_bicycle_model.get_state(vehicle_pose, path_array)
+        reference_curvature = spatial_bicycle_model.get_path_curvature()
+
+        state = spatial_bicycle_model.calculate_spatial_state()
         print('State: e_y={}, e_psi={}'.format(state[0], state[1]))
 
-        optimization_result = self._compute_optimal_control(A, B, state)
+        optimization_result = self._compute_optimal_control(
+            A_linearized, B_linearized, state
+        )
 
-        _, nu = B.shape
+        _, nu = B_linearized.shape
         kappa_tilde = optimization_result.x[-self.prediction_horizon * nu: - (
             self.prediction_horizon - 1) * nu]
 
@@ -76,9 +76,9 @@ class MPC(object):
 
         return self._convert_curvature_to_steering_angle(curvature)
 
-    def _compute_optimal_control(self, A, B, state):
-        nx, _ = B.shape
-        A_constraints = self._make_A_constraints(A, B)
+    def _compute_optimal_control(self, A_linearized, B_linearized, state):
+        nx, _ = B_linearized.shape
+        A_constraints = self._make_A_constraints(A_linearized, B_linearized)
 
         self.lower_bound[:nx] = -state
         self.upper_bound[:nx] = -state
@@ -117,17 +117,17 @@ class MPC(object):
 
         return lower_bound, upper_bound
 
-    def _make_A_constraints(self, A, B):
-        nx, nu = B.shape
+    def _make_A_constraints(self, A_linearized, B_linearized):
+        nx, nu = B_linearized.shape
 
         Ax = sparse.kron(sparse.eye(self.prediction_horizon + 1), -sparse.eye(nx)) + \
-            sparse.kron(sparse.eye(self.prediction_horizon + 1, k=-1), A)
+            sparse.kron(sparse.eye(self.prediction_horizon + 1, k=-1), A_linearized)
         Bu = sparse.kron(sparse.vstack(
             [sparse.csc_matrix((1, self.prediction_horizon)),
-             sparse.eye(self.prediction_horizon)]), B)
+             sparse.eye(self.prediction_horizon)]), B_linearized)
 
         A_equality = sparse.hstack([Ax, Bu])
-        A_inequality = sparse.eye((self.prediction_horizon+1)
+        A_inequality = sparse.eye((self.prediction_horizon + 1)
                                   * nx + self.prediction_horizon * nu)
 
         A_constraints = sparse.vstack([A_equality, A_inequality], format='csc')
@@ -142,7 +142,7 @@ class MPC(object):
 
         q = np.hstack([
             np.kron(np.ones(self.prediction_horizon), -self.Q.dot(self.state_reference)),
-            -self.Qn.dot(self.state_reference), np.zeros(self.prediction_horizon*nu)])
+            -self.Qn.dot(self.state_reference), np.zeros(self.prediction_horizon * nu)])
 
         return P, q
 

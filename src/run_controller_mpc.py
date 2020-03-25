@@ -16,7 +16,7 @@ simulation_steps = int(simulation_time / dt)
 
 Q = sparse.diags([1, 1])
 Qn = Q
-R = 0.1*sparse.eye(1)
+R = 0.1 * sparse.eye(1)
 prediction_horizon = 10
 velocity = 5
 
@@ -31,7 +31,7 @@ wheelbase = 1
 max_velocity = 10
 max_steering_angle = math.pi
 
-initial_state = np.array([0, 0, math.pi/2])
+initial_state = np.array([0, 0, math.pi / 2])
 
 vehicle = Vehicle(
     wheelbase=wheelbase, initial_state=initial_state, dt=dt,
@@ -41,16 +41,17 @@ vehicle_x = np.zeros(simulation_steps)
 vehicle_y = np.zeros(simulation_steps)
 steering_angles = np.zeros(simulation_steps)
 
-spatial_bicycle_model = SpatialBicycleModel()
+spatial_bicycle_model = SpatialBicycleModel(
+    path.as_array_with_curvature(), vehicle.state)
 
 mpc = MPC(Q=Q, R=R, Qn=Qn, prediction_horizon=prediction_horizon,
           kappa_tilde_min=-np.inf, kappa_tilde_max=np.inf, wheelbase=wheelbase)
-mpc.setup_optimization_problem(
-    spatial_bicycle_model, vehicle.state, path.as_array_with_curvature())
+mpc.setup_optimization_problem(spatial_bicycle_model)
 
 for k in range(simulation_steps):
-    steering_angle = mpc.compute_steering_angle(
-        spatial_bicycle_model, vehicle.state, path.as_array_with_curvature())
+    spatial_bicycle_model.update(path.as_array_with_curvature(), vehicle.state)
+
+    steering_angle = mpc.compute_steering_angle(spatial_bicycle_model)
 
     if steering_angle is not None:
         vehicle.send_commands(velocity=velocity, steering_angle=steering_angle)
