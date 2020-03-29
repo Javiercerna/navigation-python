@@ -7,8 +7,8 @@ import math
 
 class MPC(object):
     def __init__(
-            self, Q, R, Qn, prediction_horizon, kappa_tilde_min,
-            kappa_tilde_max, wheelbase):
+            self, Q, R, Qn, prediction_horizon, steering_angle_min,
+            steering_angle_max, wheelbase):
         self.Q = Q
         self.R = R
         self.Qn = Qn
@@ -16,14 +16,16 @@ class MPC(object):
         self.nx = 2
         self.nu = 1
 
-        self.kappa_tilde_min = kappa_tilde_min
-        self.kappa_tilde_max = kappa_tilde_max
+        self.wheelbase = wheelbase
+
+        self.curvature_min = self._convert_steering_angle_to_curvature(
+            steering_angle_min)
+        self.curvature_max = self._convert_steering_angle_to_curvature(
+            steering_angle_max)
         self.e_y_min = -3
         self.e_y_max = 3
         self.e_psi_min = -math.pi / 2
         self.e_psi_max = math.pi / 2
-
-        self.wheelbase = wheelbase
 
         self.state_reference = np.array([0, 0])
 
@@ -33,7 +35,7 @@ class MPC(object):
         state = spatial_bicycle_model.calculate_spatial_state()
 
         lower_bound_equality, upper_bound_equality = self._make_state_dynamics_constraints(
-            state)
+            state, spatial_bicycle_model)
 
         lower_bound_inequality, upper_bound_inequality = self._make_state_and_input_constraints()
 
@@ -52,8 +54,6 @@ class MPC(object):
         self.upper_bound = upper_bound
 
     def compute_steering_angle(self, spatial_bicycle_model):
-        reference_curvature = spatial_bicycle_model.get_path_curvature()
-
         state = spatial_bicycle_model.calculate_spatial_state()
         print('State: e_y={}, e_psi={}'.format(state[0], state[1]))
 
@@ -67,7 +67,7 @@ class MPC(object):
             print('Problem infeasible...')
             return None, None
 
-        curvature = kappa_tilde[0] + reference_curvature
+        curvature = kappa_tilde[0]
 
         predicted_poses = spatial_bicycle_model.calculate_predicted_poses(
             state, self.prediction_horizon)
@@ -89,7 +89,23 @@ class MPC(object):
 
         return result
 
-    def _make_state_dynamics_constraints(self, state):
+    def _make_state_dynamics_constraints(self, state, spatial_bicycle_model):
+        lower_bound_equality = -state
+
+        # Spatial model designed for "kappa_tilde", but we want to use "curvature"
+        # Relation: kappa_tilde = curvature - path_curvature
+        # For each row: Other terms + B * kappa_tilde = 0 (original)
+        # To compensate: Other terms + B * curvature = B * path_curvature
+        for horizon_step in range(self.prediction_horizon):
+            path_curvature = spatial_bicycle_model.get_path_curvature(
+                horizon_step)
+            _, B_linearized = spatial_bicycle_model.calculate_linearized_matrices(
+                horizon_step)
+
+            lower_bound_equality = np.hstack(
+                [lower_bound_equality, B_linearized.flatten() * path_curvature]
+            )
+
         lower_bound_equality = np.hstack(
             [-state, np.zeros(self.prediction_horizon * self.nx)])
         upper_bound_equality = lower_bound_equality
@@ -100,8 +116,8 @@ class MPC(object):
         state_min = np.array([self.e_y_min, self.e_psi_min])
         state_max = np.array([self.e_y_max, self.e_psi_max])
 
-        input_min = np.array([self.kappa_tilde_min])
-        input_max = np.array([self.kappa_tilde_max])
+        input_min = np.array([self.curvature_min])
+        input_max = np.array([self.curvature_max])
 
         lower_bound = self._make_inequality_constraint(state_min, input_min)
         upper_bound = self._make_inequality_constraint(state_max, input_max)
@@ -175,3 +191,6 @@ class MPC(object):
 
     def _convert_curvature_to_steering_angle(self, curvature):
         return np.arctan2(curvature * self.wheelbase, 1)
+
+    def _convert_steering_angle_to_curvature(self, steering_angle):
+        return np.tan(steering_angle) / self.wheelbase

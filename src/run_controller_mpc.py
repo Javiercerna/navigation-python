@@ -17,7 +17,7 @@ simulation_steps = int(simulation_time / dt)
 Q = sparse.diags([1, 1])
 Qn = Q
 R = 0.1 * sparse.eye(1)
-prediction_horizon = 10
+prediction_horizon = 20
 velocity = 5
 
 with open('./src/paths/simulated_waypoints.json') as f:
@@ -44,8 +44,11 @@ steering_angles = np.zeros(simulation_steps)
 spatial_bicycle_model = SpatialBicycleModel(
     path.as_array_with_curvature(), vehicle.state)
 
-mpc = MPC(Q=Q, R=R, Qn=Qn, prediction_horizon=prediction_horizon,
-          kappa_tilde_min=-np.inf, kappa_tilde_max=np.inf, wheelbase=wheelbase)
+mpc = MPC(
+    Q=Q, R=R, Qn=Qn, prediction_horizon=prediction_horizon,
+    steering_angle_min=np.radians(-16),
+    steering_angle_max=np.radians(16),
+    wheelbase=wheelbase)
 mpc.setup_optimization_problem(spatial_bicycle_model)
 
 for k in range(simulation_steps):
