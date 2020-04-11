@@ -37,8 +37,8 @@ vehicle = Vehicle(
     wheelbase=wheelbase, initial_state=initial_state, dt=dt,
     max_velocity=max_velocity, max_steering_angle=max_steering_angle)
 
-vehicle_x = np.zeros(simulation_steps)
-vehicle_y = np.zeros(simulation_steps)
+vehicle_x = np.append(initial_state[0], np.zeros(simulation_steps - 1))
+vehicle_y = np.append(initial_state[1], np.zeros(simulation_steps - 1))
 steering_angles = np.zeros(simulation_steps)
 
 spatial_bicycle_model = SpatialBicycleModel(
@@ -51,7 +51,7 @@ mpc = MPC(
     wheelbase=wheelbase)
 mpc.setup_optimization_problem(spatial_bicycle_model)
 
-for k in range(simulation_steps):
+for k in range(1, simulation_steps):
     spatial_bicycle_model.update(path.as_array_with_curvature(), vehicle.state)
 
     steering_angle, predicted_poses = mpc.compute_steering_angle(
@@ -66,8 +66,8 @@ for k in range(simulation_steps):
     steering_angles[k] = steering_angle
 
     plt.clf()
-    plt.plot(vehicle_x[k], vehicle_y[k], '-ko')
-    plt.plot(vehicle_x[0:k], vehicle_y[0:k], 'b')
+    plt.plot(vehicle_x[k - 1], vehicle_y[k - 1], '-ko')
+    plt.plot(vehicle_x[0:k], vehicle_y[0:k], 'b', linewidth=2)
     plt.plot(path.path_x, path.path_y, 'g')
 
     if predicted_poses is not None:

@@ -60,17 +60,26 @@ class MPC(object):
         optimization_result = self._compute_optimal_control(
             spatial_bicycle_model)
 
-        kappa_tilde = optimization_result.x[-self.prediction_horizon * self.nu: - (
-            self.prediction_horizon - 1) * self.nu]
+        predicted_states = optimization_result.x[
+            :-self.prediction_horizon * self.nu
+        ]
 
-        if kappa_tilde[0] is None:
+        predicted_states = [
+            np.array(predicted_states[ind:ind + self.nx])
+            for ind in range(0, len(predicted_states), self.nx)
+        ]
+
+        curvatures = optimization_result.x[-self.prediction_horizon * self.nu:]
+
+        if curvatures[0] is None:
             print('Problem infeasible...')
             return None, None
 
-        curvature = kappa_tilde[0]
+        curvature = curvatures[0]
 
         predicted_poses = spatial_bicycle_model.calculate_predicted_poses(
-            state, self.prediction_horizon)
+            predicted_states, self.prediction_horizon
+        )
 
         return self._convert_curvature_to_steering_angle(curvature), predicted_poses
 

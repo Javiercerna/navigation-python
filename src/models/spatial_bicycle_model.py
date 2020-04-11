@@ -20,11 +20,13 @@ class SpatialBicycleModel(object):
 
         return np.array([e_y, e_psi])
 
-    def calculate_predicted_poses(self, spatial_state, prediction_horizon):
+    def calculate_predicted_poses(self, predicted_states, prediction_horizon):
         predicted_poses = []
 
-        for horizon_step in range(prediction_horizon):
-            predicted_pose = self._calculate_pose(spatial_state, horizon_step)
+        for horizon_step in range(prediction_horizon + 1):
+            predicted_pose = self._calculate_pose(
+                predicted_states[horizon_step], horizon_step
+            )
             predicted_poses.append(predicted_pose)
 
         return np.array(predicted_poses)
