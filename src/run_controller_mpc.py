@@ -29,7 +29,7 @@ path = Path(waypoints_x=waypoints_x, waypoints_y=waypoints_y)
 
 wheelbase = 1
 max_velocity = 10
-max_steering_angle = math.pi
+max_steering_angle = np.radians(16)
 
 initial_state = np.array([0, 0, math.pi / 2])
 

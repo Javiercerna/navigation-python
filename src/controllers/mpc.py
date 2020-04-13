@@ -88,8 +88,11 @@ class MPC(object):
 
         A_constraints = self._make_A_constraints(spatial_bicycle_model)
 
-        self.lower_bound[0:self.nx] = -state
-        self.upper_bound[0:self.nx] = -state
+        lower_bound_equality, upper_bound_equality = self._make_state_dynamics_constraints(
+            state, spatial_bicycle_model)
+
+        self.lower_bound[0:len(lower_bound_equality)] = lower_bound_equality
+        self.upper_bound[0:len(upper_bound_equality)] = upper_bound_equality
 
         self.optimization_problem.update(
             Ax=A_constraints.data, l=self.lower_bound, u=self.upper_bound)
@@ -99,7 +102,11 @@ class MPC(object):
         return result
 
     def _make_state_dynamics_constraints(self, state, spatial_bicycle_model):
-        lower_bound_equality = -state
+        lower_bound_equality = np.zeros(
+            self.nx * (self.prediction_horizon + 1)
+        )
+
+        lower_bound_equality[0:self.nx] = -state
 
         # Spatial model designed for "kappa_tilde", but we want to use "curvature"
         # Relation: kappa_tilde = curvature - path_curvature
@@ -111,12 +118,11 @@ class MPC(object):
             _, B_linearized = spatial_bicycle_model.calculate_linearized_matrices(
                 horizon_step)
 
-            lower_bound_equality = np.hstack(
-                [lower_bound_equality, B_linearized.flatten() * path_curvature]
-            )
+            lower_bound_equality[
+                (horizon_step + 1) * self.nx:
+                (horizon_step + 2) * self.nx
+            ] = B_linearized.flatten() * path_curvature
 
-        lower_bound_equality = np.hstack(
-            [-state, np.zeros(self.prediction_horizon * self.nx)])
         upper_bound_equality = lower_bound_equality
 
         return lower_bound_equality, upper_bound_equality

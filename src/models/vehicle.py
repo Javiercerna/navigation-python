@@ -37,8 +37,10 @@ class Vehicle(object):
         if abs(steering_angle) <= self.MAX_STEERING_ANGLE:
             return steering_angle
 
-        print('Limiting steering angle. Input was: {:.3f}'.format(
-            steering_angle))
+        print(
+            'Limiting steering angle. Input was: {:.3f}'
+            .format(np.rad2deg(steering_angle))
+        )
 
         return self.MAX_STEERING_ANGLE if steering_angle >= 0 \
             else -self.MAX_STEERING_ANGLE
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     np.random.seed(0)
     wheelbase = 1
     max_velocity = 10
-    max_steering_angle = math.pi/4
+    max_steering_angle = math.pi / 4
 
     initial_state = np.array([0, 0, 0])
 
