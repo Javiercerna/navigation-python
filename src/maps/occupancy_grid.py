@@ -17,13 +17,19 @@ class OccupancyGrid(object):
             'cmap': 'gray',
             'origin': 'lower',
             'aspect': 'equal',
-            'extent': [0, self.width * self.resolution, 0, self.height * self.resolution],
+            'extent': [
+                0 - self.resolution / 2,
+                self.width * self.resolution - self.resolution / 2,
+                0 - self.resolution / 2,
+                self.height * self.resolution - self.resolution / 2
+            ],
             'vmin': 0,
             'vmax': 100
         }
 
     def show(self):
-        plt.imshow(self.grid_data, **self.grid_visualization_options)
+        # Flip axes to visualize correctly with imshow
+        plt.imshow(self.grid_data.T, **self.grid_visualization_options)
         plt.show()
 
 

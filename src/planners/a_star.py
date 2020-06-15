@@ -7,9 +7,10 @@ class AStar(object):
     COST_BETWEEN_NODES = 1
     DISTANCE_BETWEEN_NODES = 1
 
-    def __init__(self, start_node, goal_node):
+    def __init__(self, start_node, goal_node, map=None):
         self.start_node = start_node
         self.goal_node = goal_node
+        self.map = map
 
         self.path_cost = {start_node: 0}
         self.total_cost = {}
@@ -62,17 +63,38 @@ class AStar(object):
         return path
 
     def _compute_node_neighbors(self, node):
-        # Assume 8-connectivity
-        return [
-            (node[0] - self.DISTANCE_BETWEEN_NODES, node[1] - self.DISTANCE_BETWEEN_NODES),
-            (node[0] - self.DISTANCE_BETWEEN_NODES, node[1]),
-            (node[0] - self.DISTANCE_BETWEEN_NODES, node[1] + self.DISTANCE_BETWEEN_NODES),
-            (node[0], node[1] - self.DISTANCE_BETWEEN_NODES),
-            (node[0], node[1] + self.DISTANCE_BETWEEN_NODES),
-            (node[0] + self.DISTANCE_BETWEEN_NODES, node[1] - self.DISTANCE_BETWEEN_NODES),
-            (node[0] + self.DISTANCE_BETWEEN_NODES, node[1]),
-            (node[0] + self.DISTANCE_BETWEEN_NODES, node[1] + self.DISTANCE_BETWEEN_NODES)
-        ]
+        # If no map is given, assume 8-connectivity
+        if self.map is None:
+            return [
+                (node[0] - self.DISTANCE_BETWEEN_NODES, node[1] - self.DISTANCE_BETWEEN_NODES),
+                (node[0] - self.DISTANCE_BETWEEN_NODES, node[1]),
+                (node[0] - self.DISTANCE_BETWEEN_NODES, node[1] + self.DISTANCE_BETWEEN_NODES),
+                (node[0], node[1] - self.DISTANCE_BETWEEN_NODES),
+                (node[0], node[1] + self.DISTANCE_BETWEEN_NODES),
+                (node[0] + self.DISTANCE_BETWEEN_NODES, node[1] - self.DISTANCE_BETWEEN_NODES),
+                (node[0] + self.DISTANCE_BETWEEN_NODES, node[1]),
+                (node[0] + self.DISTANCE_BETWEEN_NODES, node[1] + self.DISTANCE_BETWEEN_NODES)
+            ]
+
+        neighbors = []
+
+        for row in [-1, 0, 1]:
+            for col in [-1, 0, 1]:
+                if row == 0 and col == 0:
+                    continue
+
+                if node[0] + row < 0 or node[0] + row >= self.map.shape[0]:
+                    continue
+
+                if node[1] + col < 0 or node[1] + col >= self.map.shape[1]:
+                    continue
+
+                if self.map[node[0] + row, node[1] + col] == 0:
+                    continue
+
+                neighbors.append((node[0] + row, node[1] + col))
+
+        return neighbors
 
     def _update_node_total_cost(self, node):
         cost_from_path = self.path_cost[node]
