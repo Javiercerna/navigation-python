@@ -5,7 +5,6 @@ import numpy as np
 
 class AStar(object):
     COST_BETWEEN_NODES = 1
-    DISTANCE_BETWEEN_NODES = 1
 
     def __init__(self, start_node, goal_node, map=None):
         self.start_node = start_node
@@ -22,6 +21,13 @@ class AStar(object):
         }
 
     def compute_path(self):
+        if self.map is not None:
+            nodes = [self.start_node, self.goal_node]
+
+            if not all([self.map.is_node_within_map(node) for node in nodes]):
+                print('Start or goal nodes are not within the map')
+                return []
+
         came_from = {}
 
         while len(self.nodes_to_explore) != 0:
@@ -63,17 +69,17 @@ class AStar(object):
         return path
 
     def _compute_node_neighbors(self, node):
-        # If no map is given, assume 8-connectivity
+        # If no map is given, assume 8-connectivity and distance = 1
         if self.map is None:
             return [
-                (node[0] - self.DISTANCE_BETWEEN_NODES, node[1] - self.DISTANCE_BETWEEN_NODES),
-                (node[0] - self.DISTANCE_BETWEEN_NODES, node[1]),
-                (node[0] - self.DISTANCE_BETWEEN_NODES, node[1] + self.DISTANCE_BETWEEN_NODES),
-                (node[0], node[1] - self.DISTANCE_BETWEEN_NODES),
-                (node[0], node[1] + self.DISTANCE_BETWEEN_NODES),
-                (node[0] + self.DISTANCE_BETWEEN_NODES, node[1] - self.DISTANCE_BETWEEN_NODES),
-                (node[0] + self.DISTANCE_BETWEEN_NODES, node[1]),
-                (node[0] + self.DISTANCE_BETWEEN_NODES, node[1] + self.DISTANCE_BETWEEN_NODES)
+                (node[0] - 1, node[1] - 1),
+                (node[0] - 1, node[1]),
+                (node[0] - 1, node[1] + 1),
+                (node[0], node[1] - 1),
+                (node[0], node[1] + 1),
+                (node[0] + 1, node[1] - 1),
+                (node[0] + 1, node[1]),
+                (node[0] + 1, node[1] + 1)
             ]
 
         neighbors = []
@@ -83,16 +89,19 @@ class AStar(object):
                 if row == 0 and col == 0:
                     continue
 
-                if node[0] + row < 0 or node[0] + row >= self.map.shape[0]:
+                neighbor_x = node[0] + row * self.map.resolution
+                neighbor_y = node[1] + col * self.map.resolution
+
+                if not self.map.is_node_within_map((neighbor_x, neighbor_y)):
                     continue
 
-                if node[1] + col < 0 or node[1] + col >= self.map.shape[1]:
+                grid_row = neighbor_x // self.map.resolution
+                grid_col = neighbor_y // self.map.resolution
+
+                if self.map.grid_data[grid_row, grid_col] == 0:
                     continue
 
-                if self.map[node[0] + row, node[1] + col] == 0:
-                    continue
-
-                neighbors.append((node[0] + row, node[1] + col))
+                neighbors.append((neighbor_x, neighbor_y))
 
         return neighbors
 

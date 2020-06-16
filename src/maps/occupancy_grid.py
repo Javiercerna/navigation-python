@@ -27,6 +27,20 @@ class OccupancyGrid(object):
             'vmax': 100
         }
 
+    @property
+    def total_width_m(self):
+        return self.width * self.resolution
+
+    @property
+    def total_height_m(self):
+        return self.height * self.resolution
+
+    def is_node_within_map(self, node):
+        check_x = node[0] >= 0 and node[0] < self.width * self.resolution
+        check_y = node[1] >= 0 and node[1] < self.height * self.resolution
+
+        return check_x and check_y
+
     def show(self):
         # Flip axes to visualize correctly with imshow
         plt.imshow(self.grid_data.T, **self.grid_visualization_options)
