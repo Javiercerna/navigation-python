@@ -48,7 +48,8 @@ class OccupancyGrid(object):
         closest_x = int(node[0] / self.resolution + 0.5) * self.resolution
         closest_y = int(node[1] / self.resolution + 0.5) * self.resolution
 
-        return (closest_x, closest_y)
+        # Preserve other indices (e.g. orientation)
+        return (closest_x, closest_y) + node[2:]
 
     def show(self):
         # Flip axes to visualize correctly with imshow

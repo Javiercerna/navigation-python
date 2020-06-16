@@ -5,6 +5,7 @@ import numpy as np
 
 class AStar(object):
     COST_BETWEEN_NODES = 1
+    EPSILON_CLOSE_TO_GOAL = 0.2
 
     def __init__(self, start_node, goal_node, map=None):
         self.start_node = start_node
@@ -36,7 +37,8 @@ class AStar(object):
         while len(self.nodes_to_explore) != 0:
             best_node = self._find_node_with_min_cost()
 
-            if best_node == self.goal_node:
+            if self._is_node_close_to_goal(best_node):
+                self.goal_node = best_node
                 return self._reconstruct_path(came_from)
 
             self.nodes_to_explore.pop(best_node)
@@ -57,6 +59,12 @@ class AStar(object):
                         self.nodes_to_explore[neighbor] = self.total_cost[neighbor]
 
         return []
+
+    def _is_node_close_to_goal(self, node):
+        goal_node = np.array(self.goal_node[0:2])
+        node = np.array(node[0:2])
+
+        return np.linalg.norm(goal_node - node) <= self.EPSILON_CLOSE_TO_GOAL
 
     def _find_node_with_min_cost(self):
         return min(self.nodes_to_explore, key=self.nodes_to_explore.get)
@@ -118,7 +126,10 @@ class AStar(object):
         return self.path_cost[previous_node] + self.COST_BETWEEN_NODES
 
     def _heuristic(self, node):
-        return np.linalg.norm(np.array(self.goal_node) - np.array(node))
+        goal_node = np.array(self.goal_node[0:2])
+        node = np.array(node[0:2])
+
+        return np.linalg.norm(goal_node - node)
 
 
 if __name__ == '__main__':
