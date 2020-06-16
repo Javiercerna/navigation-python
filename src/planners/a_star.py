@@ -98,7 +98,7 @@ class AStar(object):
                 grid_row = neighbor_x // self.map.resolution
                 grid_col = neighbor_y // self.map.resolution
 
-                if self.map.grid_data[grid_row, grid_col] == 0:
+                if self.map.grid_data[grid_row, grid_col] != self.map.EMPTY:
                     continue
 
                 neighbors.append((neighbor_x, neighbor_y))

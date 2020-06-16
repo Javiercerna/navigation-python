@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 
 
 class OccupancyGrid(object):
+    EMPTY = 0
+    FULL = 100
+
     def __init__(self, width, height, resolution=1):
         ## The map resolution [m/cell]
         self.resolution = resolution
@@ -14,7 +17,7 @@ class OccupancyGrid(object):
         self.grid_data = np.zeros((self.width, self.height))
         ## Grid visualization options
         self.grid_visualization_options = {
-            'cmap': 'gray',
+            'cmap': 'gray_r',
             'origin': 'lower',
             'aspect': 'equal',
             'extent': [

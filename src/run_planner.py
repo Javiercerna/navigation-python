@@ -8,11 +8,12 @@ height = 15
 
 map = OccupancyGrid(width, height, resolution=10)
 
-map.grid_data[:, :] = 100
-map.grid_data[5:, 0] = 0
-map.grid_data[5, 4:8] = 0
-map.grid_data[2:6, 8] = 0
-map.grid_data[2, 2] = 0
+# Example map representation
+map.grid_data[:, :] = OccupancyGrid.EMPTY
+map.grid_data[5:, 0] = OccupancyGrid.FULL
+map.grid_data[5, 4:8] = OccupancyGrid.FULL
+map.grid_data[2:6, 8] = OccupancyGrid.FULL
+map.grid_data[2, 2] = OccupancyGrid.FULL
 
 start_node = (0, 0)
 goal_node = (100, 100)
