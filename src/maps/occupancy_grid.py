@@ -21,10 +21,10 @@ class OccupancyGrid(object):
             'origin': 'lower',
             'aspect': 'equal',
             'extent': [
-                0 - self.resolution / 2,
-                self.width * self.resolution - self.resolution / 2,
-                0 - self.resolution / 2,
-                self.height * self.resolution - self.resolution / 2
+                0 - self.resolution / 2.0,
+                self.width * self.resolution - self.resolution / 2.0,
+                0 - self.resolution / 2.0,
+                self.height * self.resolution - self.resolution / 2.0
             ],
             'vmin': 0,
             'vmax': 100
@@ -43,6 +43,12 @@ class OccupancyGrid(object):
         check_y = node[1] >= 0 and node[1] < self.height * self.resolution
 
         return check_x and check_y
+
+    def get_closest_cell(self, node):
+        closest_x = int(node[0] / self.resolution + 0.5) * self.resolution
+        closest_y = int(node[1] / self.resolution + 0.5) * self.resolution
+
+        return (closest_x, closest_y)
 
     def show(self):
         # Flip axes to visualize correctly with imshow

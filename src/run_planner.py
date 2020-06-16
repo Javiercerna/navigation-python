@@ -16,7 +16,7 @@ map.grid_data[2:6, 8] = OccupancyGrid.FULL
 map.grid_data[2, 2] = OccupancyGrid.FULL
 
 start_node = (0, 0)
-goal_node = (100, 100)
+goal_node = (105, 105)
 
 a_star = AStar(start_node, goal_node, map=map)
 

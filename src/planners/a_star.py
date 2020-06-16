@@ -28,6 +28,9 @@ class AStar(object):
                 print('Start or goal nodes are not within the map')
                 return []
 
+            self.start_node = self.map.get_closest_cell(self.start_node)
+            self.goal_node = self.map.get_closest_cell(self.goal_node)
+
         came_from = {}
 
         while len(self.nodes_to_explore) != 0:
