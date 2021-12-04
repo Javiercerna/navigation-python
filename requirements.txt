@@ -1,7 +1,2 @@
-autopep8
-matplotlib
-numpy
-osqp
-pylint
-pytest
-scipy
+matplotlib==3.5.0
+numpy==1.21.4
