@@ -11,6 +11,8 @@ input_limits:
   linear_velocity_min: -5
   linear_velocity_max: 5
 
+fixed_linear_velocity: 1.0
+
 vehicle_dimensions:
   wheelbase: 1.0
 

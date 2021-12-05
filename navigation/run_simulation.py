@@ -1,6 +1,5 @@
 from navigation.controllers.base import DecoupledController
 from navigation.controllers.lateral.pure_pursuit import PurePursuit
-from navigation.controllers.longitudinal.fake_longitudinal import FakeLongitudinalController
 from navigation.models import KinematicBicycleModel
 from navigation.simulation import Simulation
 from navigation.utils import load_parameters, load_reference
@@ -17,12 +16,15 @@ if __name__ == '__main__':
         dimensions=parameters['vehicle_dimensions'],
     )
 
-    lateral_controller = PurePursuit(**parameters['pure_pursuit'])
-    longitudinal_controller = FakeLongitudinalController()
+    controller = DecoupledController(
+        lateral_controller=PurePursuit(**parameters['pure_pursuit']),
+        longitudinal_controller=None,
+        fixed_linear_velocity=parameters['fixed_linear_velocity'],
+    )
 
     simulation = Simulation(
         vehicle=vehicle,
-        controller=DecoupledController(lateral_controller, longitudinal_controller),
+        controller=controller,
         reference=load_reference(parameters['reference_folder']),
         options=parameters['simulation_options'],
     )
