@@ -1,16 +1,20 @@
-.PHONY: build, run
+.PHONY: bash, build, run_simulation
 
-DEV_DOCKERFILE := .docker/dev/Dockerfile
+DEV_DOCKERFILE = ".docker/dev/Dockerfile"
+DOCKER_RUN_OPTIONS = \
+	--name=navigation-python \
+	--rm \
+	--env="DISPLAY=${DISPLAY}" \
+	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+	--volume="${XAUTHORITY}:/root/.Xauthority" \
+	--volume="${PWD}:/src" \
+	navigation-python
 
 build:
 	docker build -t navigation-python -f ${DEV_DOCKERFILE} .
 
-run:
-	docker run -it \
-		--name=navigation-python \
-		--rm \
-		--env="DISPLAY=${DISPLAY}" \
-		--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-		--volume="${XAUTHORITY}:/root/.Xauthority" \
-		--volume="${PWD}:/src" \
-		navigation-python bash -c "python src/models/vehicle.py"
+run_simulation:
+	docker run -it ${DOCKER_RUN_OPTIONS} bash -c "python -m navigation.run_simulation"
+
+bash:
+	docker run -it ${DOCKER_RUN_OPTIONS} bash
