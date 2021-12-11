@@ -1,9 +1,15 @@
 from navigation.controllers.base import DecoupledController
 from navigation.controllers.lateral.pure_pursuit import PurePursuit
 from navigation.models import KinematicBicycleModel
+from navigation.planners.spline_planner import SplinePlanner
 from navigation.simulation import Simulation
-from navigation.utils import load_parameters, load_reference
-from navigation.vehicle import State, Vehicle
+from navigation.utils import (
+    load_parameters,
+    load_reference,
+    load_waypoints,
+    State,
+)
+from navigation.vehicle import Vehicle
 
 
 if __name__ == '__main__':
@@ -25,7 +31,9 @@ if __name__ == '__main__':
     simulation = Simulation(
         vehicle=vehicle,
         controller=controller,
-        reference=load_reference(parameters['reference_folder']),
+        waypoints=load_waypoints(parameters['waypoints_filename']),
+        planner=SplinePlanner(**parameters['spline_planner']),
         options=parameters['simulation_options'],
+        fixed_reference=load_reference(parameters['reference_folder']),
     )
     simulation.run()

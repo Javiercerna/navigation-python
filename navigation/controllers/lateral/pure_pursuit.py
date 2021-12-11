@@ -5,7 +5,7 @@ import numpy as np
 
 from navigation.controllers.base import LateralController
 from navigation.models import KinematicBicycleModel
-from navigation.vehicle import State
+from navigation.utils import State
 
 
 class PurePursuit(LateralController):

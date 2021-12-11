@@ -1,9 +1,5 @@
-from collections import namedtuple
-
 from navigation.models import VehicleModel
-
-
-State = namedtuple('State', ['x', 'y', 'theta'])
+from navigation.utils import State
 
 
 class Vehicle:
