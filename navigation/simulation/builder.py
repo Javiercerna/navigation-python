@@ -1,14 +1,10 @@
 from navigation.controllers.base import DecoupledController
 from navigation.controllers.lateral.pure_pursuit import PurePursuit
+from navigation.controllers.longitudinal.fixed_velocity import FixedLinearVelocityController
 from navigation.models import KinematicBicycleModel
 from navigation.planners.spline_planner import SplinePlanner
 from navigation.simulation.simulation import Simulation
-from navigation.utils import (
-    load_parameters,
-    load_reference,
-    load_waypoints,
-    State,
-)
+from navigation.utils import load_parameters, load_waypoints, State
 from navigation.vehicle import Vehicle
 
 
@@ -26,8 +22,7 @@ def create_simulation():
 
     controller = DecoupledController(
         lateral_controller=PurePursuit(**parameters['pure_pursuit']),
-        longitudinal_controller=None,
-        fixed_linear_velocity=parameters['fixed_linear_velocity'],
+        longitudinal_controller=FixedLinearVelocityController(parameters['fixed_linear_velocity']),
     )
 
     return Simulation(
@@ -36,5 +31,4 @@ def create_simulation():
         planner=planner,
         waypoints=load_waypoints(parameters['waypoints_filename']),
         options=parameters['simulation_options'],
-        fixed_reference=load_reference(parameters['reference_folder']),
     )

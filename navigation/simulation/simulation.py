@@ -16,23 +16,18 @@ class Simulation:
             waypoints: list[Waypoint],
             planner: Union[Planner, None],
             options: dict,
-            fixed_reference: Union[np.ndarray, None] = None,
         ) -> None:
         self.vehicle = vehicle
         self.controller = controller
         self.waypoints = waypoints
         self.planner = planner
         self.options = options
-        self.fixed_reference = fixed_reference
 
         self.reference: Union[np.ndarray, None] = None
         self.vehicle_trajectory: list[State] = []
 
     def update(self) -> None:
-        if self.planner is None and self.fixed_reference is not None:
-            self.reference = self.fixed_reference
-        else:
-            self.reference = self.planner.calculate_reference(self.waypoints)
+        self.reference = self.planner.calculate_reference(self.waypoints)
 
         if self.reference is None:
             return
@@ -48,5 +43,4 @@ class Simulation:
             return
 
         self.vehicle.update_state(linear_velocity, steering_angle, self.options['dt'])
-
         self.vehicle_trajectory.append(self.vehicle.state)
