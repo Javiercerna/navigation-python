@@ -16,5 +16,8 @@ build:
 run_simulation:
 	docker run -it ${DOCKER_RUN_OPTIONS} bash -c "python -m navigation.run_simulation"
 
+run_gui:
+	docker run -it ${DOCKER_RUN_OPTIONS} bash -c "python -m navigation.visualization.gui"
+
 bash:
 	docker run -it ${DOCKER_RUN_OPTIONS} bash

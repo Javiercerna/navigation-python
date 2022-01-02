@@ -4,7 +4,8 @@ from navigation.visualization.plot import Plot
 
 if __name__ == '__main__':
     simulation = create_simulation()
-    plot = Plot(simulation)
+    plot = Plot()
+    plot.attach_simulation(simulation)
 
     while True:
         simulation.update()
