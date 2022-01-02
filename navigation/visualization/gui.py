@@ -18,6 +18,8 @@ class GUI:
         self.simulation_options = {}
 
         self.canvas = None
+        self.buttons = {}
+        self.option_menus = {}
 
     def _load_content_frame(self) -> None:
         content_frame = ttk.Frame(self.main_window, padding=10)
@@ -42,7 +44,7 @@ class GUI:
         self._load_option_menu(
             frame=content_frame,
             options=['FixedLinearVelocityController'],
-            label_text='LongitudinalController',
+            label_text='Longitudinal Controller',
             row=2,
             column=3,
         )
@@ -89,7 +91,7 @@ class GUI:
 
     def _handle_simulation(self, force_restart: bool = False) -> None:
         if force_restart or self.restart_simulation:
-            self.simulation = create_simulation()
+            self.simulation = create_simulation(self.simulation_options)
             self.canvas.attach_simulation(self.simulation)
             self.restart_simulation = False
 
@@ -108,8 +110,31 @@ class GUI:
             column: int,
         ) -> None:
         tkvar = StringVar(self.main_window)
-        ttk.OptionMenu(frame, tkvar, *[None, *options]).grid(row=row, column=column)
+        option_menu = ttk.OptionMenu(
+            frame,
+            tkvar,
+            *[None, *options],
+            command=self._option_menu_changed(label_text),
+        )
+        option_menu.grid(row=row, column=column)
+        self.option_menus[label_text] = option_menu
         ttk.Label(frame, text=label_text).grid(row=row - 1, column=column)
+
+    def _option_menu_changed(self, text):
+        def option_changed(value):
+            self.simulation_options[text] = value
+
+            for option_menu_text in self.option_menus:
+                if option_menu_text not in self.simulation_options:
+                    return
+
+            for button in self.buttons.values():
+                if str(button['state']) == DISABLED:
+                    button['state'] = NORMAL
+
+            self._handle_simulation(force_restart=True)
+
+        return option_changed
 
     def _load_button(
             self,
@@ -119,11 +144,12 @@ class GUI:
             row: int,
             column: int,
         ) -> None:
-        ttk.Button(frame, text=text, command=command).grid(row=row, column=column)
+        button = ttk.Button(frame, text=text, command=command, state=DISABLED)
+        button.grid(row=row, column=column)
+        self.buttons[text] = button
 
     def run(self) -> None:
         self._load_content_frame()
-        self._handle_simulation(force_restart=True)
         self.main_window.mainloop()
 
 
