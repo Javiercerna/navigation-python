@@ -25,65 +25,71 @@ class GUI:
         content_frame = ttk.Frame(self.main_window, padding=10)
         content_frame.grid(row=0, column=0, sticky=(N, W, E, S))
 
+        self._load_canvas_plot_frame(frame=content_frame)
+        self._load_options_frame(frame=content_frame)
+
+    def _load_canvas_plot_frame(self, frame):
+        canvas_plot_frame = ttk.Frame(frame, padding=10)
+        canvas_plot_frame.grid(row=0, column=0, sticky=(N, W, E, S))
+
+        self.canvas = CanvasPlot(frame=canvas_plot_frame, row=0, column=0)
+
+    def _load_options_frame(self, frame):
+        options_frame = ttk.Frame(frame, padding=10)
+        options_frame.grid(row=0, column=1, sticky=(N, W, E, S))
+
         self._load_option_menu(
-            frame=content_frame,
+            frame=options_frame,
             options=['FixedReferencePlanner', 'SplinePlanner'],
             label_text='Planner',
-            row=2,
-            column=1,
+            row=1,
+            column=0,
         )
 
         self._load_option_menu(
-            frame=content_frame,
+            frame=options_frame,
             options=['PurePursuit'],
             label_text='Lateral Controller',
-            row=2,
-            column=2,
+            row=3,
+            column=0,
         )
 
         self._load_option_menu(
-            frame=content_frame,
+            frame=options_frame,
             options=['FixedLinearVelocityController'],
             label_text='Longitudinal Controller',
-            row=2,
-            column=3,
+            row=5,
+            column=0,
         )
 
         self._load_button(
-            frame=content_frame,
+            frame=options_frame,
             text='Start',
             command=self._start_simulation,
-            row=2,
-            column=4,
+            row=7,
+            column=0,
         )
 
         self._load_button(
-            frame=content_frame,
-            text='Stop',
-            command=self._stop_simulation,
-            row=2,
-            column=5,
+            frame=options_frame,
+            text='Pause',
+            command=self._pause_simulation,
+            row=9,
+            column=0,
         )
 
         self._load_button(
-            frame=content_frame,
+            frame=options_frame,
             text='Restart',
             command=self._restart_simulation,
-            row=2,
-            column=6,
+            row=11,
+            column=0,
         )
-
-        self.canvas = CanvasPlot(frame=self.main_window, row=3, column=0)
-
-        for widget in content_frame.winfo_children():
-            if isinstance(widget, ttk.Label):
-                continue
-            widget.grid_configure(padx=15)
 
     def _start_simulation(self) -> None:
         self.simulation_active = True
 
-    def _stop_simulation(self) -> None:
+    def _pause_simulation(self) -> None:
         self.simulation_active = False
 
     def _restart_simulation(self) -> None:
@@ -116,7 +122,7 @@ class GUI:
             *[None, *options],
             command=self._option_menu_changed(label_text),
         )
-        option_menu.grid(row=row, column=column)
+        option_menu.grid(row=row, column=column, pady=(0, 15))
         self.option_menus[label_text] = option_menu
         ttk.Label(frame, text=label_text).grid(row=row - 1, column=column)
 
