@@ -65,6 +65,13 @@ class GUI:
                 frame=options_frame, text=text, command=command, row=row, column=0
             )
 
+        more_information_label = ttk.Label(
+            options_frame,
+            text='Simulation parameters can be edited in parameters.yml',
+            wraplength=150
+        )
+        more_information_label.grid(row=row + 1, column=0, pady=30)
+
     def _start_simulation(self) -> None:
         self.simulation_active = True
 
