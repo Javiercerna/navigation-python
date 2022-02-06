@@ -43,53 +43,34 @@ class GUI:
         options_frame = ttk.Frame(frame, padding=10)
         options_frame.grid(row=0, column=1, sticky=(N, W, E, S))
 
-        self._load_option_menu(
-            frame=options_frame,
-            options=['FixedReferencePlanner', 'SplinePlanner'],
-            simulation_options_key=PLANNER,
-            row=1,
-            column=0,
-        )
+        row = 1
+        simulation_options = {
+            PLANNER: ['FixedReferencePlanner', 'SplinePlanner'],
+            LATERAL_CONTROLLER: ['PurePursuit'],
+            LONGITUDINAL_CONTROLLER: ['FixedLinearVelocityController'],
+        }
 
-        self._load_option_menu(
-            frame=options_frame,
-            options=['PurePursuit'],
-            simulation_options_key=LATERAL_CONTROLLER,
-            row=3,
-            column=0,
-        )
+        for key, options in simulation_options.items():
+            self._load_option_menu(
+                frame=options_frame,
+                options=options,
+                simulation_options_key=key,
+                row=row,
+                column=0,
+            )
+            row += 2
 
-        self._load_option_menu(
-            frame=options_frame,
-            options=['FixedLinearVelocityController'],
-            simulation_options_key=LONGITUDINAL_CONTROLLER,
-            row=5,
-            column=0,
-        )
+        button_commands = {
+            'Start': self._start_simulation,
+            'Pause': self._pause_simulation,
+            'Restart': self._restart_simulation,
+        }
 
-        self._load_button(
-            frame=options_frame,
-            text='Start',
-            command=self._start_simulation,
-            row=7,
-            column=0,
-        )
-
-        self._load_button(
-            frame=options_frame,
-            text='Pause',
-            command=self._pause_simulation,
-            row=9,
-            column=0,
-        )
-
-        self._load_button(
-            frame=options_frame,
-            text='Restart',
-            command=self._restart_simulation,
-            row=11,
-            column=0,
-        )
+        for text, command in button_commands.items():
+            row += 1
+            self._load_button(
+                frame=options_frame, text=text, command=command, row=row, column=0
+            )
 
     def _start_simulation(self) -> None:
         self.simulation_active = True
