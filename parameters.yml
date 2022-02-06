@@ -24,6 +24,3 @@ spline_planner:
 
 pure_pursuit:
   lookahead_distance: 1.0
-
-reference_folder: 'data/path1'
-waypoints_filename: 'data/waypoints/waypoints1.txt'

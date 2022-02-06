@@ -1,3 +1,5 @@
+import re
+
 from navigation.controllers.base import DecoupledController
 from navigation.controllers.lateral.pure_pursuit import PurePursuit
 from navigation.controllers.longitudinal.fixed_velocity import FixedLinearVelocityController
@@ -47,8 +49,9 @@ def create_simulation(simulation_options: dict):
 
 
 def create_planner(planner_name: str, parameters: dict):
-    if planner_name == 'FixedReferencePlanner':
-        return FixedReferencePlanner(load_reference(parameters['reference_folder']))
+    if 'FixedReferencePlanner' in planner_name:
+        reference_filename = re.search('\((.*)\)', planner_name).group(1)
+        return FixedReferencePlanner(load_reference(reference_filename))
     elif planner_name == 'SplinePlanner':
         return SplinePlanner(**parameters['spline_planner'])
 

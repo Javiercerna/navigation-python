@@ -8,6 +8,7 @@ import yaml
 Waypoint = namedtuple('Waypoint', ['x', 'y'])
 State = namedtuple('State', ['x', 'y', 'theta'])
 
+REFERENCES_FOLDER = 'data/references'
 WAYPOINTS_FOLDER = 'data/waypoints'
 
 
@@ -16,14 +17,8 @@ def load_parameters(filename: str) -> dict:
         return yaml.load(f, Loader=yaml.SafeLoader)
 
 
-def load_reference(reference_folder: str) -> np.ndarray:
-    reference = {}
-
-    for reference_name in ['x', 'y']:
-        with open(f'{reference_folder}/{reference_name}.txt', 'r') as f:
-            reference[reference_name] = [float(line.rstrip('\n')) for line in f]
-
-    return np.array([[x, y] for x, y in zip(reference['x'], reference['y'])])
+def load_reference(reference_filename: str) -> np.ndarray:
+    return np.loadtxt(os.path.join(REFERENCES_FOLDER, reference_filename))
 
 
 def load_waypoints(waypoints_filename: str) -> list[Waypoint]:
@@ -40,6 +35,10 @@ def get_project_folder() -> str:
 
 def get_waypoint_filenames() -> list[str]:
     return os.listdir(os.path.join(get_project_folder(), WAYPOINTS_FOLDER))
+
+
+def get_reference_filenames() -> list[str]:
+    return os.listdir(os.path.join(get_project_folder(), REFERENCES_FOLDER))
 
 
 def calculate_ds(waypoints_x, waypoints_y):

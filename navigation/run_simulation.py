@@ -9,7 +9,7 @@ from navigation.visualization.plot import Plot
 
 if __name__ == '__main__':
     simulation_options = {
-        PLANNER: 'FixedReferencePlanner',
+        PLANNER: 'FixedReferencePlanner (reference2.txt)',
         LATERAL_CONTROLLER: 'PurePursuit',
         LONGITUDINAL_CONTROLLER: 'FixedLinearVelocityController',
     }

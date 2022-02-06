@@ -1,4 +1,4 @@
-from navigation.utils import get_waypoint_filenames
+from navigation.utils import get_reference_filenames, get_waypoint_filenames
 
 
 PLANNER = 'Planner'
@@ -12,7 +12,13 @@ REQUIRED_OPTIONS = [PLANNER, LATERAL_CONTROLLER, LONGITUDINAL_CONTROLLER]
 def get_simulation_options() -> dict:
     return {
         WAYPOINTS: get_waypoint_filenames(),
-        PLANNER: ['FixedReferencePlanner', 'SplinePlanner'],
+        PLANNER: [
+            *[
+                f'FixedReferencePlanner ({reference_filename})'
+                for reference_filename in get_reference_filenames()
+            ],
+            'SplinePlanner',
+        ],
         LATERAL_CONTROLLER: ['PurePursuit'],
         LONGITUDINAL_CONTROLLER: ['FixedLinearVelocityController'],
     }
