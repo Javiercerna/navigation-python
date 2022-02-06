@@ -1,13 +1,9 @@
-from typing import Callable
 from tkinter import *
 from tkinter import ttk
+from typing import Callable
 
 from navigation.run_simulation import create_simulation
-from navigation.simulation.options import (
-    LATERAL_CONTROLLER,
-    LONGITUDINAL_CONTROLLER,
-    PLANNER,
-)
+from navigation.simulation.options import REQUIRED_OPTIONS, get_simulation_options
 from navigation.visualization.plot import CanvasPlot
 
 
@@ -24,7 +20,10 @@ class GUI:
 
         self.canvas = None
         self.buttons = {}
-        self.option_menus = {}
+        self.selected_options = {
+            option_key: False
+            for option_key in get_simulation_options()
+        }
 
     def _load_content_frame(self) -> None:
         content_frame = ttk.Frame(self.main_window, padding=10)
@@ -44,13 +43,7 @@ class GUI:
         options_frame.grid(row=0, column=1, sticky=(N, W, E, S))
 
         row = 1
-        simulation_options = {
-            PLANNER: ['FixedReferencePlanner', 'SplinePlanner'],
-            LATERAL_CONTROLLER: ['PurePursuit'],
-            LONGITUDINAL_CONTROLLER: ['FixedLinearVelocityController'],
-        }
-
-        for key, options in simulation_options.items():
+        for key, options in get_simulation_options().items():
             self._load_option_menu(
                 frame=options_frame,
                 options=options,
@@ -109,16 +102,16 @@ class GUI:
             command=self._option_menu_changed(simulation_options_key),
         )
         option_menu.grid(row=row, column=column, pady=(0, 15))
-        self.option_menus[simulation_options_key] = option_menu
         label_text = f'Choose {simulation_options_key.lower()}'
         ttk.Label(frame, text=label_text).grid(row=row - 1, column=column)
 
     def _option_menu_changed(self, simulation_options_key):
         def option_changed(value):
             self.simulation_options[simulation_options_key] = value
+            self.selected_options[simulation_options_key] = value is not None
 
-            for option_menu_text in self.option_menus:
-                if option_menu_text not in self.simulation_options:
+            for option_key, option_selected in self.selected_options.items():
+                if option_key in REQUIRED_OPTIONS and not option_selected:
                     return
 
             for button in self.buttons.values():

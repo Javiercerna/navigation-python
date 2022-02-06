@@ -9,6 +9,7 @@ from navigation.simulation.options import (
     LATERAL_CONTROLLER,
     LONGITUDINAL_CONTROLLER,
     PLANNER,
+    WAYPOINTS,
 )
 from navigation.utils import load_parameters, load_reference, load_waypoints, State
 from navigation.vehicle import Vehicle
@@ -24,6 +25,11 @@ def create_simulation(simulation_options: dict):
         dimensions=parameters['vehicle_dimensions'],
     )
 
+    waypoints = (
+        load_waypoints(simulation_options[WAYPOINTS])
+        if WAYPOINTS in simulation_options
+        else []
+    )
     planner = create_planner(simulation_options[PLANNER], parameters)
     controller = create_decoupled_controller(
         simulation_options[LATERAL_CONTROLLER],
@@ -35,7 +41,7 @@ def create_simulation(simulation_options: dict):
         vehicle=vehicle,
         controller=controller,
         planner=planner,
-        waypoints=load_waypoints(parameters['waypoints_filename']),
+        waypoints=waypoints,
         options=parameters['simulation_options'],
     )
 

@@ -1,11 +1,14 @@
 from collections import namedtuple
 
 import numpy as np
+import os
 import yaml
 
 
 Waypoint = namedtuple('Waypoint', ['x', 'y'])
 State = namedtuple('State', ['x', 'y', 'theta'])
+
+WAYPOINTS_FOLDER = 'data/waypoints'
 
 
 def load_parameters(filename: str) -> dict:
@@ -24,11 +27,20 @@ def load_reference(reference_folder: str) -> np.ndarray:
 
 
 def load_waypoints(waypoints_filename: str) -> list[Waypoint]:
-    with open(waypoints_filename, 'r') as f:
+    with open(f'{WAYPOINTS_FOLDER}/{waypoints_filename}', 'r') as f:
         return [
             Waypoint(*[float(value) for value in line.rstrip('\n').split(',')])
             for line in f
         ]
+
+
+def get_project_folder() -> str:
+    return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+
+def get_waypoint_filenames() -> list[str]:
+    return os.listdir(os.path.join(get_project_folder(), WAYPOINTS_FOLDER))
+
 
 def calculate_ds(waypoints_x, waypoints_y):
     dx_dt = np.gradient(waypoints_x)
