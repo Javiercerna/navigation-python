@@ -3,6 +3,11 @@ from tkinter import *
 from tkinter import ttk
 
 from navigation.run_simulation import create_simulation
+from navigation.simulation.options import (
+    LATERAL_CONTROLLER,
+    LONGITUDINAL_CONTROLLER,
+    PLANNER,
+)
 from navigation.visualization.plot import CanvasPlot
 
 
@@ -41,7 +46,7 @@ class GUI:
         self._load_option_menu(
             frame=options_frame,
             options=['FixedReferencePlanner', 'SplinePlanner'],
-            label_text='Planner',
+            simulation_options_key=PLANNER,
             row=1,
             column=0,
         )
@@ -49,7 +54,7 @@ class GUI:
         self._load_option_menu(
             frame=options_frame,
             options=['PurePursuit'],
-            label_text='Lateral Controller',
+            simulation_options_key=LATERAL_CONTROLLER,
             row=3,
             column=0,
         )
@@ -57,7 +62,7 @@ class GUI:
         self._load_option_menu(
             frame=options_frame,
             options=['FixedLinearVelocityController'],
-            label_text='Longitudinal Controller',
+            simulation_options_key=LONGITUDINAL_CONTROLLER,
             row=5,
             column=0,
         )
@@ -111,7 +116,7 @@ class GUI:
             self,
             frame: ttk.Frame,
             options: list[str],
-            label_text: str,
+            simulation_options_key: str,
             row: int,
             column: int,
         ) -> None:
@@ -120,15 +125,16 @@ class GUI:
             frame,
             tkvar,
             *[None, *options],
-            command=self._option_menu_changed(label_text),
+            command=self._option_menu_changed(simulation_options_key),
         )
         option_menu.grid(row=row, column=column, pady=(0, 15))
-        self.option_menus[label_text] = option_menu
+        self.option_menus[simulation_options_key] = option_menu
+        label_text = f'Choose {simulation_options_key.lower()}'
         ttk.Label(frame, text=label_text).grid(row=row - 1, column=column)
 
-    def _option_menu_changed(self, text):
+    def _option_menu_changed(self, simulation_options_key):
         def option_changed(value):
-            self.simulation_options[text] = value
+            self.simulation_options[simulation_options_key] = value
 
             for option_menu_text in self.option_menus:
                 if option_menu_text not in self.simulation_options:

@@ -5,6 +5,11 @@ from navigation.models import KinematicBicycleModel
 from navigation.planners.fixed_reference import FixedReferencePlanner
 from navigation.planners.spline_planner import SplinePlanner
 from navigation.simulation.simulation import Simulation
+from navigation.simulation.options import (
+    LATERAL_CONTROLLER,
+    LONGITUDINAL_CONTROLLER,
+    PLANNER,
+)
 from navigation.utils import load_parameters, load_reference, load_waypoints, State
 from navigation.vehicle import Vehicle
 
@@ -19,10 +24,10 @@ def create_simulation(simulation_options: dict):
         dimensions=parameters['vehicle_dimensions'],
     )
 
-    planner = create_planner(simulation_options['Planner'], parameters)
+    planner = create_planner(simulation_options[PLANNER], parameters)
     controller = create_decoupled_controller(
-        simulation_options['Lateral Controller'],
-        simulation_options['Longitudinal Controller'],
+        simulation_options[LATERAL_CONTROLLER],
+        simulation_options[LONGITUDINAL_CONTROLLER],
         parameters,
     )
 
