@@ -11,7 +11,7 @@ if __name__ == '__main__':
     simulation_options = {
         PLANNER: 'FixedReferencePlanner (reference2.txt)',
         LATERAL_CONTROLLER: 'PurePursuit',
-        LONGITUDINAL_CONTROLLER: 'FixedLinearVelocityController',
+        LONGITUDINAL_CONTROLLER: 'FixedLinearVelocityController (5 m/s)',
     }
 
     simulation = create_simulation(simulation_options)

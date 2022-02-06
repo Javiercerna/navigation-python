@@ -20,5 +20,8 @@ def get_simulation_options() -> dict:
             'SplinePlanner',
         ],
         LATERAL_CONTROLLER: ['PurePursuit'],
-        LONGITUDINAL_CONTROLLER: ['FixedLinearVelocityController'],
+        LONGITUDINAL_CONTROLLER: [
+            f'FixedLinearVelocityController ({linear_velocity} m/s)'
+            for linear_velocity in [1, 5]
+        ],
     }

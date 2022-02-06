@@ -64,9 +64,10 @@ def create_decoupled_controller(
     if lateral_controller_name == 'PurePursuit':
         lateral_controller = PurePursuit(**parameters['pure_pursuit'])
 
-    if longitudinal_controller_name == 'FixedLinearVelocityController':
-        longitudinal_controller = FixedLinearVelocityController(
-            parameters['fixed_linear_velocity']
+    if 'FixedLinearVelocityController' in longitudinal_controller_name:
+        linear_velocity = float(
+            re.search('\((.*) m/s\)', longitudinal_controller_name).group(1)
         )
+        longitudinal_controller = FixedLinearVelocityController(linear_velocity)
 
     return DecoupledController(lateral_controller, longitudinal_controller)
