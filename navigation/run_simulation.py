@@ -1,10 +1,10 @@
-from navigation.simulation.builder import create_simulation
-from navigation.simulation.options import (
+from navigation.simulation import (
+    create_simulation,
     LATERAL_CONTROLLER,
     LONGITUDINAL_CONTROLLER,
     PLANNER,
 )
-from navigation.visualization.plot import Plot
+from navigation.visualization import Plot
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import ttk
 
-from navigation.simulation.simulation import Simulation
+from navigation.simulation import Simulation
 
 
 class Plot:

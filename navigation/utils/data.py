@@ -1,12 +1,10 @@
-from collections import namedtuple
-
-import numpy as np
 import os
 import yaml
 
+import numpy as np
 
-Waypoint = namedtuple('Waypoint', ['x', 'y'])
-State = namedtuple('State', ['x', 'y', 'theta'])
+from navigation.utils.types import Waypoint
+
 
 REFERENCES_FOLDER = 'data/references'
 WAYPOINTS_FOLDER = 'data/waypoints'
@@ -30,7 +28,7 @@ def load_waypoints(waypoints_filename: str) -> list[Waypoint]:
 
 
 def get_project_folder() -> str:
-    return os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 def get_waypoint_filenames() -> list[str]:
@@ -39,10 +37,3 @@ def get_waypoint_filenames() -> list[str]:
 
 def get_reference_filenames() -> list[str]:
     return os.listdir(os.path.join(get_project_folder(), REFERENCES_FOLDER))
-
-
-def calculate_ds(waypoints_x, waypoints_y):
-    dx_dt = np.gradient(waypoints_x)
-    dy_dt = np.gradient(waypoints_y)
-
-    return np.around(np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt), 2)

@@ -2,8 +2,8 @@ from typing import Union
 
 import numpy as np
 
-from navigation.controllers.base import Controller
-from navigation.planners.base import Planner
+from navigation.controllers import Controller
+from navigation.planners import Planner
 from navigation.utils import State, Waypoint
 from navigation.vehicle import Vehicle
 

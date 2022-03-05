@@ -2,8 +2,11 @@ from tkinter import *
 from tkinter import ttk
 from typing import Callable
 
-from navigation.run_simulation import create_simulation
-from navigation.simulation.options import REQUIRED_OPTIONS, get_simulation_options
+from navigation.simulation import (
+    create_simulation,
+    get_simulation_options,
+    REQUIRED_OPTIONS,
+)
 from navigation.visualization.plot import CanvasPlot
 
 
